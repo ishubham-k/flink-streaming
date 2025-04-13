@@ -143,6 +143,23 @@ resource "aws_security_group" "kafka_sg" {
     cidr_blocks = ["${var.my_ip}/32"]
   }
 
+  ingress {
+    description = "Kafka access from EMR nodes"
+    from_port   = 9092
+    to_port     = 9092
+    protocol    = "tcp"
+    security_groups = [
+      aws_security_group.emr_master.id,
+      aws_security_group.emr_slave.id
+    ]
+  }
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["${var.my_ip}/32"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -285,7 +302,7 @@ resource "aws_emr_cluster" "streaming_demo" {
   }
 
   core_instance_group {
-    instance_type  = "m4.large"
+    instance_type  = "m5.xlarge"
     instance_count = 2
 
     ebs_config {
